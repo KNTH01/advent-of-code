@@ -21,14 +21,14 @@ fn part1(input: &str) -> String {
                 .unwrap()
                 .to_string();
 
-            let second_digit = l
+            let last_digit = l
                 .chars()
                 .rev()
                 .find(|c| numbers.contains(&c.to_string()))
                 .unwrap()
                 .to_string();
 
-            let digits = format!("{first_digit}{second_digit}");
+            let digits = format!("{first_digit}{last_digit}");
 
             digits.parse::<i32>().unwrap()
         })
