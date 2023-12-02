@@ -1,22 +1,4 @@
-enum CubeColor {
-    R,
-    G,
-    B,
-}
-
-struct Cube {
-    count: u32,
-    color: CubeColor,
-}
-
-struct Set {
-    cubes: Vec<Cube>,
-}
-
-struct Game {
-    id: u32,
-    sets: Vec<Set>,
-}
+use day_02::parser::parse;
 
 fn main() {
     let input = include_str!("./input1.txt");
@@ -25,6 +7,10 @@ fn main() {
 }
 
 fn part1(input: &str) -> String {
+    let res = parse(input);
+
+    dbg!(&res);
+
     "8".to_string()
 }
 
