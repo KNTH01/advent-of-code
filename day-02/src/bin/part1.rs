@@ -1,4 +1,4 @@
-use day_02::parser::parse;
+use day_02::parser::{parse, CubeColor};
 
 fn main() {
     let input = include_str!("./input1.txt");
@@ -7,11 +7,32 @@ fn main() {
 }
 
 fn part1(input: &str) -> String {
-    let res = parse(input);
+    let res = parse(input).unwrap();
 
-    dbg!(&res);
+    let res = res
+        .iter()
+        .filter(|game| {
+            game.sets.iter().all(|set| {
+                let mut ok = true;
 
-    "8".to_string()
+                for cube in set.cubes.iter() {
+                    ok = match cube.color {
+                        CubeColor::Red => cube.count <= 12,
+                        CubeColor::Green => cube.count <= 13,
+                        CubeColor::Blue => cube.count <= 14,
+                    };
+
+                    if !ok {
+                        break;
+                    }
+                }
+                ok
+            })
+        })
+        .map(|game| game.id)
+        .sum::<u32>();
+
+    res.to_string()
 }
 
 #[cfg(test)]
