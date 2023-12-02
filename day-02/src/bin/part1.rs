@@ -26,6 +26,7 @@ fn part1(input: &str) -> String {
                         break;
                     }
                 }
+
                 ok
             })
         })

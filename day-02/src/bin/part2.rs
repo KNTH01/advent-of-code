@@ -1,3 +1,7 @@
+use std::cmp;
+
+use day_02::parser::{parse, CubeColor};
+
 fn main() {
     let input = include_str!("./input1.txt");
     let output = part2(input);
@@ -5,66 +9,28 @@ fn main() {
 }
 
 fn part2(input: &str) -> String {
-    let numbers: Vec<_> = (1..=9)
-        .collect::<Vec<i32>>()
+    let games = parse(input).unwrap();
+
+    let res = games
         .iter()
-        .map(|n| n.to_string())
-        .collect();
+        .map(|game| {
+            let mut max_red = 0;
+            let mut max_green = 0;
+            let mut max_blue = 0;
 
-    let alpha_numbers: Vec<String> = [
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-    ]
-    .iter()
-    .map(|str| str.to_string())
-    .collect();
-
-    let lines = input.lines();
-
-    let res = lines
-        .map(|l| {
-            let mut res = String::new();
-            let mut start_index = 0;
-
-            while start_index < l.len() {
-                let mut found = false;
-
-                for (i, an) in alpha_numbers.iter().enumerate() {
-                    let end_index = start_index + an.len();
-                    if end_index <= l.len() && &l[start_index..end_index] == an {
-                        res.push_str(&numbers[i]);
-                        start_index = end_index;
-                        found = true;
-                        break;
-                    }
-                }
-                
-                if !found {
-                    res.push(l.chars().nth(start_index).unwrap());
-                    start_index += 1;
+            for set in game.sets.iter() {
+                for cube in set.cubes.iter() {
+                    match cube.color {
+                        CubeColor::Red => max_red = cmp::max(max_red, cube.count),
+                        CubeColor::Green => max_green = cmp::max(max_green, cube.count),
+                        CubeColor::Blue => max_blue = cmp::max(max_blue, cube.count),
+                    };
                 }
             }
 
-            res
+            max_red * max_green * max_blue
         })
-        .map(|l| {
-            let first_digit = l
-                .chars()
-                .find(|c| numbers.contains(&c.to_string()))
-                .unwrap()
-                .to_string();
-
-            let last_digit = l
-                .chars()
-                .rev()
-                .find(|c| numbers.contains(&c.to_string()))
-                .unwrap()
-                .to_string();
-
-            let digits = format!("{first_digit}{last_digit}");
-
-            digits.parse::<i32>().unwrap()
-        })
-        .sum::<i32>();
+        .sum::<u32>();
 
     res.to_string()
 }
@@ -76,17 +42,14 @@ mod tests {
     #[test]
     fn it_works() {
         let result = part2(
-            "two1nine
-eightwothree
-abcone2threexyz
-xtwone3four
-4nineeightseven2
-zoneight234
-7pqrstsixteen
-",
+            "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
         );
 
-        assert_eq!(result, "281".to_string());
+        assert_eq!(result, "2286".to_string());
     }
 }
 
