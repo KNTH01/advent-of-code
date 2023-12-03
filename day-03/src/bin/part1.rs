@@ -1,3 +1,5 @@
+use day_03::map::Map;
+
 fn main() {
     let input = include_str!("./input1.txt");
     let output = part1(input);
@@ -5,7 +7,8 @@ fn main() {
 }
 
 fn part1(input: &str) -> String {
-    let map = Map::new();
+    let map = Map::new(input);
+    dbg!(&map);
 
     "4361".to_string()
 }

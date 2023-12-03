@@ -4,13 +4,14 @@ pub struct Point {
     pub y: u32,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TileType {
     Digit,
     Period,
     Symbol,
 }
 
+#[derive(Debug)]
 pub struct Map {
     pub width: u32,
     pub height: u32,
@@ -19,14 +20,26 @@ pub struct Map {
 }
 
 impl Map {
-    pub fn new(width: u32, height: u32) -> Self {
-        let count_tiles = (width * height) as usize;
+    pub fn new(input: &str) -> Self {
+        let width = input
+            .chars()
+            .position(|c| c == '\n')
+            .expect("input should have lines");
+        let height = input.lines().collect::<Vec<_>>().len();
+        let count_tiles = width * height;
 
         Self {
-            width,
-            height,
+            width: width as u32,
+            height: height as u32,
             count_tiles,
-            tiles: vec![TileType::Period; count_tiles],
+            tiles: input
+                .chars()
+                .map(|c| match c {
+                    '.' => TileType::Period,
+                    c if c.is_ascii_digit() => TileType::Digit,
+                    _ => TileType::Symbol,
+                })
+                .collect::<Vec<_>>(),
         }
     }
 
