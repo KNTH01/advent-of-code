@@ -112,18 +112,16 @@ fn part2(input: &str) -> String {
         }
     }
 
-    let _ = map
-        .tiles
+    map.tiles
         .iter()
         .enumerate()
         .filter(|(_, t)| t.t == TileType::Symbol && t.c == '*')
         .map(|(i, _t)| TileGear {
             p: map.map_point(i),
         })
-        .map(|tile_gear| tile_gear.check_surrounding_for_gear_ratio(&map, &nums))
-        .collect::<Vec<_>>();
-
-    "1234".to_string()
+        .filter_map(|tile_gear| tile_gear.check_surrounding_for_gear_ratio(&map, &nums))
+        .sum::<u32>()
+        .to_string()
 }
 
 #[cfg(test)]
