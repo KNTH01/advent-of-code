@@ -58,6 +58,12 @@ impl Map {
         }
     }
 
+    pub fn get_tile(&self, p: &Point) -> &Tile {
+        let Point { x, y } = p;
+
+        &self.tiles[self.map_index(*x, *y)]
+    }
+
     pub fn map_index(&self, x: i32, y: i32) -> usize {
         ((y * self.width) + x) as usize
     }
@@ -68,5 +74,9 @@ impl Map {
         let y = index / self.width;
 
         Point { x, y }
+    }
+
+    pub fn in_bounds(&self, p: &Point) -> bool {
+        p.x >= 0 && p.x < self.width && p.y >= 0 && p.y < self.height
     }
 }
