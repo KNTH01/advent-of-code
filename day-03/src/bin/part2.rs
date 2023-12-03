@@ -1,72 +1,113 @@
+use day_03::map::{Map, Point, TileType};
+
 fn main() {
     let input = include_str!("./input1.txt");
     let output = part2(input);
     dbg!(&output);
 }
 
+#[derive(Debug)]
+struct TileNum {
+    idx_start: usize,
+    idx_end: usize,
+    num: String,
+}
+
+impl TileNum {
+    fn is_part_num(&self, map: &Map) -> bool {
+        let p1 = map.map_point(self.idx_start);
+        let p2 = map.map_point(self.idx_end);
+
+        let top_left_p = Point {
+            x: p1.x - 1,
+            y: p1.y - 1,
+        };
+
+        let top_right_p = Point {
+            x: p2.x + 1,
+            y: p2.y - 1,
+        };
+
+        let btm_left_p = Point {
+            x: p1.x - 1,
+            y: p1.y + 1,
+        };
+
+        let btm_right_p = Point {
+            x: p2.x + 1,
+            y: p2.y + 1,
+        };
+
+        let left_p = Point {
+            x: p1.x - 1,
+            y: p1.y,
+        };
+
+        let right_p = Point {
+            x: p2.x + 1,
+            y: p2.y,
+        };
+
+        let mut please_check: Vec<_> = vec![
+            top_left_p,
+            top_right_p,
+            btm_left_p,
+            btm_right_p,
+            left_p,
+            right_p,
+        ];
+
+        for i in 0..self.num.len() {
+            let i = i as i32;
+
+            please_check.push(Point {
+                x: p1.x + i,
+                y: p1.y - 1,
+            });
+
+            please_check.push(Point {
+                x: p1.x + i,
+                y: p1.y + 1,
+            });
+        }
+
+        please_check
+            .iter()
+            .filter(|p| map.in_bounds(p))
+            .any(|p| map.get_tile(p).t == TileType::Symbol)
+    }
+}
+
 fn part2(input: &str) -> String {
-    let numbers: Vec<_> = (1..=9)
-        .collect::<Vec<i32>>()
-        .iter()
-        .map(|n| n.to_string())
-        .collect();
+    let map = Map::new(input);
 
-    let alpha_numbers: Vec<String> = [
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-    ]
-    .iter()
-    .map(|str| str.to_string())
-    .collect();
+    let mut nums = Vec::new();
+    let mut buf = String::new();
+    let mut idx_start: Option<usize> = None;
 
-    let lines = input.lines();
-
-    let res = lines
-        .map(|l| {
-            let mut res = String::new();
-            let mut start_index = 0;
-
-            while start_index < l.len() {
-                let mut found = false;
-
-                for (i, an) in alpha_numbers.iter().enumerate() {
-                    let end_index = start_index + an.len();
-                    if end_index <= l.len() && &l[start_index..end_index] == an {
-                        res.push_str(&numbers[i]);
-                        start_index = end_index;
-                        found = true;
-                        break;
-                    }
-                }
-                
-                if !found {
-                    res.push(l.chars().nth(start_index).unwrap());
-                    start_index += 1;
-                }
+    for (idx, tile) in map.tiles.iter().enumerate() {
+        if tile.t == TileType::Digit {
+            buf.push(tile.c);
+            if idx_start.is_none() {
+                idx_start = Some(idx)
             }
+        } else if !buf.is_empty() {
+            nums.push(TileNum {
+                idx_start: idx_start.unwrap(),
+                idx_end: idx - 1,
+                num: buf.clone(),
+            });
 
-            res
-        })
-        .map(|l| {
-            let first_digit = l
-                .chars()
-                .find(|c| numbers.contains(&c.to_string()))
-                .unwrap()
-                .to_string();
+            buf.clear();
+            idx_start = None;
+        }
+    }
 
-            let last_digit = l
-                .chars()
-                .rev()
-                .find(|c| numbers.contains(&c.to_string()))
-                .unwrap()
-                .to_string();
-
-            let digits = format!("{first_digit}{last_digit}");
-
-            digits.parse::<i32>().unwrap()
-        })
-        .sum::<i32>();
-
-    res.to_string()
+    nums.iter()
+        .filter(|n| n.is_part_num(&map))
+        .map(|n| n.num.parse::<u32>().unwrap())
+        .sum::<u32>()
+        .to_string()
 }
 
 #[cfg(test)]
@@ -76,17 +117,19 @@ mod tests {
     #[test]
     fn it_works() {
         let result = part2(
-            "two1nine
-eightwothree
-abcone2threexyz
-xtwone3four
-4nineeightseven2
-zoneight234
-7pqrstsixteen
-",
+            "467..114..
+...*......
+..35..633.
+......#...
+617*......
+.....+.58.
+..592.....
+......755.
+...$.*....
+.664.598..",
         );
 
-        assert_eq!(result, "281".to_string());
+        assert_eq!(result, "4361".to_string());
     }
 }
 
