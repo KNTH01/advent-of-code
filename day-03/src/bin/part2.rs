@@ -1,6 +1,6 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
-use day_03::map::{Map, Point, Tile, TileType};
+use day_03::map::{Map, Point, TileType};
 
 fn main() {
     let input = include_str!("./input1.txt");
@@ -81,9 +81,18 @@ impl TileGear {
                 }
             });
 
-        dbg!(&num_set);
+        let count: u32 = num_set.len().try_into().unwrap();
 
-        None
+        if count == 2 {
+            Some(
+                num_set
+                    .iter()
+                    .map(|ns| ns.num.parse::<u32>().unwrap())
+                    .product(),
+            )
+        } else {
+            None
+        }
     }
 }
 
