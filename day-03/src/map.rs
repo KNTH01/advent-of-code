@@ -19,7 +19,7 @@ pub struct Map {
     pub tiles: Vec<Tile>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Tile {
     pub t: TileType,
     pub c: char,

@@ -1,4 +1,6 @@
-use day_03::map::{Map, Point, TileType};
+use std::collections::{HashMap, HashSet};
+
+use day_03::map::{Map, Point, Tile, TileType};
 
 fn main() {
     let input = include_str!("./input1.txt");
@@ -6,7 +8,7 @@ fn main() {
     dbg!(&output);
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Hash)]
 struct TileNum {
     idx_start: usize,
     idx_end: usize,
@@ -14,6 +16,16 @@ struct TileNum {
 }
 
 impl TileNum {
+    fn get_coords(&self, map: &Map) -> Vec<Point> {
+        let mut res = Vec::new();
+
+        for i in self.idx_start..=self.idx_end {
+            res.push(map.map_point(i));
+        }
+
+        res
+    }
+
     fn is_part_num(&self, map: &Map) -> bool {
         let p1 = map.map_point(self.idx_start);
         let p2 = map.map_point(self.idx_end);
@@ -78,6 +90,115 @@ impl TileNum {
     }
 }
 
+struct TileGear {
+    p: Point,
+}
+
+impl TileGear {
+    fn check_surrounding_for_gear_ratio(&self, map: &Map, nums: &[TileNum]) -> Option<u32> {
+        let p = self.p;
+
+        let top_left_p = Point {
+            x: p.x - 1,
+            y: p.y - 1,
+        };
+        let top_right_p = Point {
+            x: p.x + 1,
+            y: p.y - 1,
+        };
+        let btm_left_p = Point {
+            x: p.x - 1,
+            y: p.y + 1,
+        };
+        let btm_right_p = Point {
+            x: p.x + 1,
+            y: p.y + 1,
+        };
+        let top_p = Point { x: p.x, y: p.y - 1 };
+        let btm_p = Point { x: p.x, y: p.y + 1 };
+        let left_p = Point { x: p.x - 1, y: p.y };
+        let right_p = Point { x: p.x + 1, y: p.y };
+
+        let please_check = [
+            top_p,
+            top_left_p,
+            top_right_p,
+            btm_p,
+            btm_left_p,
+            btm_right_p,
+            left_p,
+            right_p,
+        ];
+
+        let mut num_set = HashSet::new();
+
+        please_check
+            .iter()
+            .filter(|p| map.in_bounds(p))
+            .for_each(|p| {
+                if let Some(num) = nums
+                    .iter()
+                    .find(|num| num.get_coords(map).iter().any(|c| c == p))
+                {
+                    num_set.insert(num);
+                }
+            });
+
+        dbg!(&num_set);
+
+        // if !please_check
+        //     .iter()
+        //     .filter(|p| map.in_bounds(p))
+        //     .any(|p| map.get_tile(p).t == TileType::Digit)
+        // {
+        //     return None;
+        // }
+        //
+        // let top_row: Vec<Point> = vec![top_p, top_left_p, top_right_p]
+        //     .into_iter()
+        //     .filter(|p| map.in_bounds(p))
+        //     .collect();
+        //
+        // let btm_row: Vec<Point> = vec![btm_p, btm_left_p, btm_right_p]
+        //     .into_iter()
+        //     .filter(|p| map.in_bounds(p))
+        //     .collect();
+        //
+        // let count_top = TileGear::count_adjacent_num(top_row, map);
+        // let count_btm = TileGear::count_adjacent_num(btm_row, map);
+        // let count_left = TileGear::count_adjacent_num([left_p].to_vec(), map);
+        // let count_right = TileGear::count_adjacent_num([right_p].to_vec(), map);
+        //
+        // let total: u32 = [count_top, count_btm, count_right, count_left].iter().sum();
+        // // dbg!(&total);
+        //
+        // if total > 2 || total == 0 {
+        //     return None;
+        // }
+
+        None
+    }
+
+    fn count_adjacent_num(points: Vec<Point>, map: &Map) -> u32 {
+        let count_total = points.len() as u32;
+
+        let count = points
+            .iter()
+            .filter(|p| map.tiles[map.map_index(p.x, p.y)].t == TileType::Digit)
+            .collect::<Vec<_>>()
+            .len() as u32;
+
+        if count == 0 {
+            return 0;
+        }
+
+        if count == count_total {
+            1
+        } else {
+            2
+        }
+    }
+}
 fn part2(input: &str) -> String {
     let map = Map::new(input);
 
@@ -103,11 +224,18 @@ fn part2(input: &str) -> String {
         }
     }
 
-    nums.iter()
-        .filter(|n| n.is_part_num(&map))
-        .map(|n| n.num.parse::<u32>().unwrap())
-        .sum::<u32>()
-        .to_string()
+    let _ = map
+        .tiles
+        .iter()
+        .enumerate()
+        .filter(|(_, t)| t.t == TileType::Symbol && t.c == '*')
+        .map(|(i, _t)| TileGear {
+            p: map.map_point(i),
+        })
+        .map(|tile_gear| tile_gear.check_surrounding_for_gear_ratio(&map, &nums))
+        .collect::<Vec<_>>();
+
+    "1234".to_string()
 }
 
 #[cfg(test)]
@@ -129,7 +257,12 @@ mod tests {
 .664.598..",
         );
 
-        assert_eq!(result, "4361".to_string());
+        assert_eq!(result, "467835".to_string());
     }
 }
 
+/*
+...
+.*.
+...
+*/
