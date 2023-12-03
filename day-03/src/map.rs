@@ -1,7 +1,7 @@
 #[derive(Eq, PartialEq, Copy, Clone, Debug, Hash)]
 pub struct Point {
-    pub x: u32,
-    pub y: u32,
+    pub x: i32,
+    pub y: i32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -13,8 +13,8 @@ pub enum TileType {
 
 #[derive(Debug)]
 pub struct Map {
-    pub width: u32,
-    pub height: u32,
+    pub width: i32,
+    pub height: i32,
     pub count_tiles: usize,
     pub tiles: Vec<Tile>,
 }
@@ -35,8 +35,8 @@ impl Map {
         let count_tiles = width * height;
 
         Self {
-            width: width as u32,
-            height: height as u32,
+            width: width as i32,
+            height: height as i32,
             count_tiles,
             tiles: str::replace(input, "\n", "")
                 .chars()
@@ -58,19 +58,15 @@ impl Map {
         }
     }
 
-    pub fn map_index(&self, x: u32, y: u32) -> usize {
+    pub fn map_index(&self, x: i32, y: i32) -> usize {
         ((y * self.width) + x) as usize
     }
 
-    pub fn in_bounds(&self, point: Point) -> bool {
-        point.x >= 0 && point.x < self.width && point.y >= 0 && point.y < self.height
-    }
+    pub fn map_point(&self, index: usize) -> Point {
+        let index = index as i32;
+        let x = index % self.width;
+        let y = index / self.width;
 
-    pub fn try_index(&self, point: Point) -> Option<usize> {
-        if !self.in_bounds(point) {
-            None
-        } else {
-            Some(self.map_index(point.x, point.y))
-        }
+        Point { x, y }
     }
 }
