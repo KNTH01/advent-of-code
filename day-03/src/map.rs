@@ -16,7 +16,13 @@ pub struct Map {
     pub width: u32,
     pub height: u32,
     pub count_tiles: usize,
-    pub tiles: Vec<TileType>,
+    pub tiles: Vec<Tile>,
+}
+
+#[derive(Debug)]
+pub struct Tile {
+    pub t: TileType,
+    pub c: char,
 }
 
 impl Map {
@@ -32,12 +38,21 @@ impl Map {
             width: width as u32,
             height: height as u32,
             count_tiles,
-            tiles: input
+            tiles: str::replace(input, "\n", "")
                 .chars()
                 .map(|c| match c {
-                    '.' => TileType::Period,
-                    c if c.is_ascii_digit() => TileType::Digit,
-                    _ => TileType::Symbol,
+                    '.' => Tile {
+                        t: TileType::Period,
+                        c: '.',
+                    },
+                    c if c.is_ascii_digit() => Tile {
+                        t: TileType::Digit,
+                        c,
+                    },
+                    _ => Tile {
+                        t: TileType::Symbol,
+                        c,
+                    },
                 })
                 .collect::<Vec<_>>(),
         }
