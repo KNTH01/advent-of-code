@@ -6,8 +6,33 @@ fn main() {
 
 fn process(input: &str) -> String {
     let res = day_04::parser::parse(input).unwrap();
-    dbg!(&res);
-    "toto".to_string()
+
+    res.iter()
+        .map(|card| {
+            let intersection = card
+                .set_winning
+                .intersection(&card.set_owned)
+                .map(|x| *x as u32)
+                .collect::<Vec<u32>>();
+
+            let intersection_len = intersection.len() as u32;
+
+            if intersection_len == 0 {
+                return 0;
+            }
+
+            let extra_winning_count: u32 = intersection_len - 1;
+
+            if extra_winning_count == 0 {
+                1
+            } else {
+                let res: u32 = 2;
+
+                res.pow(extra_winning_count)
+            }
+        })
+        .sum::<u32>()
+        .to_string()
 }
 
 #[cfg(test)]
