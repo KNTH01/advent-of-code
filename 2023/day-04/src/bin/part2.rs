@@ -1,70 +1,61 @@
+use day_04::parser::Card;
+
 fn main() {
     let input = include_str!("./input1.txt");
-    let output = part2(input);
+    let output = process(input);
     dbg!(&output);
 }
 
-fn part2(input: &str) -> String {
-    let numbers: Vec<_> = (1..=9)
-        .collect::<Vec<i32>>()
+fn copy_cards(orig_cards: &Vec<Card>, i: usize, n: usize) -> Vec<Card> {
+    let end = usize::min(i + n, orig_cards.len());
+
+    orig_cards[i..end].to_vec()
+}
+
+fn count_winning_cards(card: &Card) -> u32 {
+    let intersection = card
+        .set_winning
+        .intersection(&card.set_owned)
+        .map(|x| *x as u32)
+        .collect::<Vec<u32>>();
+
+    intersection.len() as u32
+}
+
+fn count_copy_card(orig_cards: &Vec<Card>, copied_cards: Vec<Card>, acc: u32) -> u32 {
+    copied_cards
         .iter()
-        .map(|n| n.to_string())
-        .collect();
+        .map(|card| {
+            let match_count = count_winning_cards(card);
 
-    let alpha_numbers: Vec<String> = [
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-    ]
-    .iter()
-    .map(|str| str.to_string())
-    .collect();
-
-    let lines = input.lines();
-
-    let res = lines
-        .map(|l| {
-            let mut res = String::new();
-            let mut start_index = 0;
-
-            while start_index < l.len() {
-                let mut found = false;
-
-                for (i, an) in alpha_numbers.iter().enumerate() {
-                    let end_index = start_index + an.len();
-                    if end_index <= l.len() && &l[start_index..end_index] == an {
-                        res.push_str(&numbers[i]);
-                        start_index = end_index;
-                        found = true;
-                        break;
-                    }
-                }
-                
-                if !found {
-                    res.push(l.chars().nth(start_index).unwrap());
-                    start_index += 1;
-                }
+            if match_count == 0 {
+                return 0;
             }
 
-            res
+            let copied_cards = copy_cards(orig_cards, card.id as usize, match_count as usize);
+
+            match_count + count_copy_card(orig_cards, copied_cards, 0)
         })
-        .map(|l| {
-            let first_digit = l
-                .chars()
-                .find(|c| numbers.contains(&c.to_string()))
-                .unwrap()
-                .to_string();
+        .sum::<u32>()
+}
 
-            let last_digit = l
-                .chars()
-                .rev()
-                .find(|c| numbers.contains(&c.to_string()))
-                .unwrap()
-                .to_string();
+fn process(input: &str) -> String {
+    let cards = day_04::parser::parse(input).unwrap();
 
-            let digits = format!("{first_digit}{last_digit}");
+    let res = cards
+        .iter()
+        .enumerate()
+        .map(|(_i, card)| {
+            let match_count = count_winning_cards(card);
+            let count_copy = count_copy_card(
+                &cards,
+                copy_cards(&cards, card.id as usize, match_count as usize),
+                0,
+            );
 
-            digits.parse::<i32>().unwrap()
+            match_count + count_copy + 1
         })
-        .sum::<i32>();
+        .sum::<u32>();
 
     res.to_string()
 }
@@ -75,18 +66,16 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let result = part2(
-            "two1nine
-eightwothree
-abcone2threexyz
-xtwone3four
-4nineeightseven2
-zoneight234
-7pqrstsixteen
-",
+        let result = process(
+            "Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
+Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19
+Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1
+Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
+Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
+Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11",
         );
 
-        assert_eq!(result, "281".to_string());
+        assert_eq!(result, "30".to_string());
     }
 }
 
