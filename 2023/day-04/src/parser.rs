@@ -1,5 +1,5 @@
 use nom::bytes::complete::tag;
-use nom::character::complete::{digit1, line_ending, multispace0, multispace1, space0, space1};
+use nom::character::complete::{digit1, line_ending, multispace0, multispace1};
 use nom::multi::separated_list1;
 use nom::sequence::{preceded, tuple};
 use nom::IResult;

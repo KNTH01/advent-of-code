@@ -1,4 +1,5 @@
 use day_04::parser::Card;
+use rayon::prelude::*;
 
 fn main() {
     let input = include_str!("./input1.txt");
@@ -24,7 +25,7 @@ fn count_winning_cards(card: &Card) -> u32 {
 
 fn count_copy_card(orig_cards: &Vec<Card>, copied_cards: &[Card]) -> u32 {
     copied_cards
-        .iter()
+        .par_iter()
         .map(|card| {
             let match_count = count_winning_cards(card);
 
@@ -43,7 +44,7 @@ fn process(input: &str) -> String {
     let cards = day_04::parser::parse(input).unwrap();
 
     let res = cards
-        .iter()
+        .par_iter()
         .enumerate()
         .map(|(_i, card)| {
             let match_count = count_winning_cards(card);
