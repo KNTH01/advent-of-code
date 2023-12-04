@@ -22,7 +22,7 @@ fn count_winning_cards(card: &Card) -> u32 {
     intersection.len() as u32
 }
 
-fn count_copy_card(orig_cards: &Vec<Card>, copied_cards: Vec<Card>, acc: u32) -> u32 {
+fn count_copy_card(orig_cards: &Vec<Card>, copied_cards: &[Card]) -> u32 {
     copied_cards
         .iter()
         .map(|card| {
@@ -34,7 +34,7 @@ fn count_copy_card(orig_cards: &Vec<Card>, copied_cards: Vec<Card>, acc: u32) ->
 
             let copied_cards = copy_cards(orig_cards, card.id as usize, match_count as usize);
 
-            match_count + count_copy_card(orig_cards, copied_cards, 0)
+            match_count + count_copy_card(orig_cards, &copied_cards)
         })
         .sum::<u32>()
 }
@@ -47,10 +47,9 @@ fn process(input: &str) -> String {
         .enumerate()
         .map(|(_i, card)| {
             let match_count = count_winning_cards(card);
-            let count_copy = count_copy_card(
+            let count_copy = &count_copy_card(
                 &cards,
-                copy_cards(&cards, card.id as usize, match_count as usize),
-                0,
+                &copy_cards(&cards, card.id as usize, match_count as usize),
             );
 
             match_count + count_copy + 1
@@ -78,4 +77,3 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11",
         assert_eq!(result, "30".to_string());
     }
 }
-
