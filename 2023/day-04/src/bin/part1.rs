@@ -5,6 +5,8 @@ fn main() {
 }
 
 fn process(input: &str) -> String {
+    let res = day_04::parser::parse(input).unwrap();
+    dbg!(&res);
     "toto".to_string()
 }
 
