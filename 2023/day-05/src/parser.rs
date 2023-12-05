@@ -8,15 +8,15 @@ use std::error::Error;
 
 type Seeds = Vec<u32>;
 
-type DestSrcRng = (u32, u32, u32);
-type Map = Vec<DestSrcRng>;
-type Maps = Vec<Vec<DestSrcRng>>;
+pub type DestSrcRng = (u32, u32, u32);
+pub type Map = Vec<DestSrcRng>;
+pub type Maps = Vec<Map>;
 
 fn parse_u32(input: &str) -> IResult<&str, u32> {
     map_res(digit1, |digit_str: &str| digit_str.parse::<u32>())(input)
 }
 
-fn parse_map(input: &str) -> IResult<&str, Vec<DestSrcRng>> {
+fn parse_map(input: &str) -> IResult<&str, Map> {
     let (input, _) = take_until(":")(input)?;
 
     let (input, _) = tag(":\n")(input)?;
