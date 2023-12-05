@@ -3,6 +3,7 @@ use day_05::parser::parse;
 fn main() {
     let input = include_str!("./input.txt");
     let output = process(input);
+
     dbg!(&output);
 }
 
@@ -16,13 +17,13 @@ fn process(input: &str) -> String {
     for seed in seeds {
         let mut mapped: u128 = seed;
 
-        for (i, map) in maps.iter().enumerate() {
+        for map in maps.iter() {
             let mut used_src: u128 = 0;
             let mut used_dest: u128 = 0;
             let mut found_rng: bool = false;
 
             for (dest, src, rng) in map {
-                if (src..=&(src + rng)).contains(&&mapped) {
+                if (src..&(src + rng)).contains(&&mapped) {
                     used_src = *src;
                     used_dest = *dest;
                     found_rng = true;
@@ -32,10 +33,9 @@ fn process(input: &str) -> String {
             if found_rng {
                 mapped = used_dest + (mapped - used_src);
             }
-
-            println!("seed {seed}, map {i}: {mapped}");
-            list.push(mapped);
         }
+
+        list.push(mapped);
     }
 
     list.iter().min().unwrap().to_string()
@@ -83,6 +83,6 @@ humidity-to-location map:
 56 93 4",
         );
 
-        assert_eq!(result, "13".to_string());
+        assert_eq!(result, "35".to_string());
     }
 }
