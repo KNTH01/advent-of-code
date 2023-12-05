@@ -1,72 +1,44 @@
+use day_05::parser::parse;
+
 fn main() {
     let input = include_str!("./input.txt");
-    let output = part2(input);
+    let output = process(input);
+
     dbg!(&output);
 }
 
-fn part2(input: &str) -> String {
-    let numbers: Vec<_> = (1..=9)
-        .collect::<Vec<i32>>()
-        .iter()
-        .map(|n| n.to_string())
-        .collect();
+fn process(input: &str) -> String {
+    let res = parse(input).unwrap();
 
-    let alpha_numbers: Vec<String> = [
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-    ]
-    .iter()
-    .map(|str| str.to_string())
-    .collect();
+    let (seeds, maps) = res;
 
-    let lines = input.lines();
+    let mut list = Vec::new();
 
-    let res = lines
-        .map(|l| {
-            let mut res = String::new();
-            let mut start_index = 0;
+    for seed in seeds {
+        let mut mapped: u128 = seed;
 
-            while start_index < l.len() {
-                let mut found = false;
+        for map in maps.iter() {
+            let mut used_src: u128 = 0;
+            let mut used_dest: u128 = 0;
+            let mut found_rng: bool = false;
 
-                for (i, an) in alpha_numbers.iter().enumerate() {
-                    let end_index = start_index + an.len();
-                    if end_index <= l.len() && &l[start_index..end_index] == an {
-                        res.push_str(&numbers[i]);
-                        start_index = end_index;
-                        found = true;
-                        break;
-                    }
-                }
-                
-                if !found {
-                    res.push(l.chars().nth(start_index).unwrap());
-                    start_index += 1;
+            for (dest, src, rng) in map {
+                if (src..&(src + rng)).contains(&&mapped) {
+                    used_src = *src;
+                    used_dest = *dest;
+                    found_rng = true;
                 }
             }
 
-            res
-        })
-        .map(|l| {
-            let first_digit = l
-                .chars()
-                .find(|c| numbers.contains(&c.to_string()))
-                .unwrap()
-                .to_string();
+            if found_rng {
+                mapped = used_dest + (mapped - used_src);
+            }
+        }
 
-            let last_digit = l
-                .chars()
-                .rev()
-                .find(|c| numbers.contains(&c.to_string()))
-                .unwrap()
-                .to_string();
+        list.push(mapped);
+    }
 
-            let digits = format!("{first_digit}{last_digit}");
-
-            digits.parse::<i32>().unwrap()
-        })
-        .sum::<i32>();
-
-    res.to_string()
+    list.iter().min().unwrap().to_string()
 }
 
 #[cfg(test)]
@@ -75,18 +47,43 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let result = part2(
-            "two1nine
-eightwothree
-abcone2threexyz
-xtwone3four
-4nineeightseven2
-zoneight234
-7pqrstsixteen
-",
+        let result = process(
+            "seeds: 79 14 55 13
+
+seed-to-soil map:
+50 98 2
+52 50 48
+
+soil-to-fertilizer map:
+0 15 37
+37 52 2
+39 0 15
+
+fertilizer-to-water map:
+49 53 8
+0 11 42
+42 0 7
+57 7 4
+
+water-to-light map:
+88 18 7
+18 25 70
+
+light-to-temperature map:
+45 77 23
+81 45 19
+68 64 13
+
+temperature-to-humidity map:
+0 69 1
+1 0 69
+
+humidity-to-location map:
+60 56 37
+56 93 4",
         );
 
-        assert_eq!(result, "281".to_string());
+        assert_eq!(result, "46".to_string());
     }
 }
 
