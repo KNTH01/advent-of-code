@@ -11,10 +11,34 @@ fn process(input: &str) -> String {
 
     let (seeds, maps) = res;
 
-    dbg!(&seeds);
-    dbg!(&maps);
+    let mut list = Vec::new();
 
-    "0".to_string()
+    for seed in seeds {
+        let mut mapped: u128 = seed;
+
+        for (i, map) in maps.iter().enumerate() {
+            let mut used_src: u128 = 0;
+            let mut used_dest: u128 = 0;
+            let mut found_rng: bool = false;
+
+            for (dest, src, rng) in map {
+                if (src..=&(src + rng)).contains(&&mapped) {
+                    used_src = *src;
+                    used_dest = *dest;
+                    found_rng = true;
+                }
+            }
+
+            if found_rng {
+                mapped = used_dest + (mapped - used_src);
+            }
+
+            println!("seed {seed}, map {i}: {mapped}");
+            list.push(mapped);
+        }
+    }
+
+    list.iter().min().unwrap().to_string()
 }
 
 #[cfg(test)]

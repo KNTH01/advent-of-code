@@ -6,14 +6,13 @@ use nom::sequence::{preceded, tuple};
 use nom::IResult;
 use std::error::Error;
 
-type Seeds = Vec<u32>;
-
-pub type DestSrcRng = (u32, u32, u32);
+pub type Seeds = Vec<u128>;
+pub type DestSrcRng = (u128, u128, u128);
 pub type Map = Vec<DestSrcRng>;
 pub type Maps = Vec<Map>;
 
-fn parse_u32(input: &str) -> IResult<&str, u32> {
-    map_res(digit1, |digit_str: &str| digit_str.parse::<u32>())(input)
+fn parse_u32(input: &str) -> IResult<&str, u128> {
+    map_res(digit1, |digit_str: &str| digit_str.parse::<u128>())(input)
 }
 
 fn parse_map(input: &str) -> IResult<&str, Map> {
