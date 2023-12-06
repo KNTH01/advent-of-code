@@ -1,4 +1,5 @@
 use day_05::parser::parse;
+use rayon::prelude::*;
 
 fn main() {
     let input = include_str!("./input.txt");
@@ -12,33 +13,45 @@ fn process(input: &str) -> String {
 
     let (seeds, maps) = res;
 
-    let mut list = Vec::new();
+    let seeds = seeds
+        .chunks_exact(2)
+        .flat_map(|chunk| {
+            let a = chunk[0];
+            let b = chunk[1];
 
-    for seed in seeds {
-        let mut mapped: u128 = seed;
+            (a..(a + b)).collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
 
-        for map in maps.iter() {
-            let mut used_src: u128 = 0;
-            let mut used_dest: u128 = 0;
-            let mut found_rng: bool = false;
+    seeds
+        .into_par_iter()
+        .map(|seed| {
+            let mut mapped: u128 = seed;
 
-            for (dest, src, rng) in map {
-                if (src..&(src + rng)).contains(&&mapped) {
-                    used_src = *src;
-                    used_dest = *dest;
-                    found_rng = true;
+            for map in maps.iter() {
+                let mut used_src: u128 = 0;
+                let mut used_dest: u128 = 0;
+                let mut found_rng: bool = false;
+
+                for (dest, src, rng) in map {
+                    if (src..&(src + rng)).contains(&&mapped) {
+                        used_src = *src;
+                        used_dest = *dest;
+                        found_rng = true;
+                    }
+                }
+
+                if found_rng {
+                    mapped = used_dest + (mapped - used_src);
                 }
             }
 
-            if found_rng {
-                mapped = used_dest + (mapped - used_src);
-            }
-        }
+            mapped
+        })
+        .min()
+        .unwrap()
+        .to_string()
 
-        list.push(mapped);
-    }
-
-    list.iter().min().unwrap().to_string()
 }
 
 #[cfg(test)]
@@ -86,4 +99,3 @@ humidity-to-location map:
         assert_eq!(result, "46".to_string());
     }
 }
-
