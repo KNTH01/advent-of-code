@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use day_05::parser::parse;
 use rayon::prelude::*;
 
@@ -13,15 +15,35 @@ fn process(input: &str) -> String {
 
     let (seeds, maps) = res;
 
-    let seeds = seeds
+    let mut seeds = seeds
         .chunks_exact(2)
-        .flat_map(|chunk| {
+        .map(|chunk| {
             let a = chunk[0];
             let b = chunk[1];
 
-            (a..(a + b)).collect::<Vec<_>>()
+            a..(a + b)
         })
         .collect::<Vec<_>>();
+
+    // remove overlapping ranges
+    seeds.sort_unstable_by_key(|range| range.start);
+    let seeds = seeds
+        .into_iter()
+        .fold(Vec::<Range<u128>>::new(), |mut acc, next_range| {
+            match acc.last_mut() {
+                Some(last_range) if last_range.end >= next_range.start => {
+                    last_range.end = next_range.end.max(last_range.end);
+                }
+                _ => acc.push(next_range),
+            }
+            acc
+        });
+
+    // map into u128 list
+    let seeds = seeds
+        .iter()
+        .flat_map(|rng| rng.clone().collect::<Vec<_>>())
+        .collect::<Vec<u128>>();
 
     seeds
         .into_par_iter()
@@ -43,8 +65,6 @@ fn process(input: &str) -> String {
                     mapped
                 }
             });
-
-            // dbg!(&res);
 
             res
         })
