@@ -11,7 +11,7 @@ fn part1(input: &str) -> String {
 
     let res = res
         .iter()
-        .filter(|game| {
+        .filter_map(|game| {
             game.sets.iter().all(|set| {
                 let mut ok = true;
 
@@ -28,9 +28,8 @@ fn part1(input: &str) -> String {
                 }
 
                 ok
-            })
+            }).then_some(game.id)
         })
-        .map(|game| game.id)
         .sum::<u32>();
 
     res.to_string()
