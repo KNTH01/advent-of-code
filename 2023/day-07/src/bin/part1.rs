@@ -1,13 +1,7 @@
-use std::iter::zip;
+use std::cmp::Ordering;
 
-use nom::{
-    bytes::complete::is_not,
-    character::complete::{self, line_ending, space1},
-    multi::separated_list1,
-    sequence::separated_pair,
-    IResult, Parser,
-};
-use nom_supreme::ParserExt;
+use day_07::camel_cards::{CardLabel, Hand};
+use itertools::Itertools;
 
 fn main() {
     let input = include_str!("./input.txt");
@@ -16,9 +10,44 @@ fn main() {
     dbg!(&output);
 }
 
-fn parse() {}
+fn process(input: &str) -> String {
+    let res = input
+        .lines()
+        .filter_map(|line| {
+            let [hand, bid] = line.split(' ').collect::<Vec<&str>>()[..] else {
+                return None;
+            };
 
-fn process(input: &str) -> String {}
+            Some(Hand::new(hand, bid.parse::<u32>().unwrap()))
+        })
+        .sorted_by(|a, b| match b.hand_type.value().cmp(&a.hand_type.value()) {
+            Ordering::Equal => {
+                let a: Vec<u32> = a.cards.iter().map(|c| c.value()).collect();
+                let b: Vec<u32> = b.cards.iter().map(|c| c.value()).collect();
+
+                for (b, a) in b.iter().zip(a.iter()) {
+                    match b.cmp(a) {
+                        Ordering::Equal => continue,
+                        other => return other,
+                    }
+                }
+
+                Ordering::Equal
+            }
+            other => other,
+        })
+        .collect::<Vec<_>>();
+
+    let count_hands = res.len();
+
+    res.iter()
+        .enumerate()
+        .fold(0, |acc, (i, card)| {
+            let res = (count_hands - i) as u32 * card.bid;
+            acc + res
+        })
+        .to_string()
+}
 
 #[cfg(test)]
 mod tests {
@@ -34,6 +63,6 @@ KTJJT 220
 QQQJA 483",
         );
 
-        assert_eq!(result, "288".to_string());
+        assert_eq!(result, "6440".to_string());
     }
 }
