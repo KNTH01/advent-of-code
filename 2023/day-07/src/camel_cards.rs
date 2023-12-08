@@ -43,7 +43,7 @@ impl CardLabel {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum HandType {
     Five,
     Four,
@@ -71,7 +71,7 @@ impl HandType {
 type CountCards = HashMap<CardLabel, u32>;
 type Cards = Vec<CardLabel>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Hand {
     pub cards: Cards,
     pub count_cards: HashMap<CardLabel, u32>,
@@ -129,7 +129,19 @@ impl Hand {
             .filter(|count| *count > 0)
             .collect::<Vec<_>>();
 
-        let max_count = *(count_cards.iter().max().unwrap());
+        let max_count = if with_joker {
+            let count_cards = cards
+                .iter()
+                .filter(|(card, _)| **card != CardLabel::Jack)
+                .map(|(_card, count)| *count)
+                .filter(|count| *count > 0)
+                .collect::<Vec<_>>();
+
+            // count without jokers
+            *(count_cards.iter().max().unwrap_or(&0))
+        } else {
+            *(count_cards.iter().max().unwrap())
+        };
 
         match max_count {
             5 => HandType::Five,
@@ -178,8 +190,11 @@ impl Hand {
                 }
             }
             _ => match count_jokers {
+                0 => HandType::HighCard,
                 1 => HandType::OnePair,
-                _ => HandType::HighCard,
+                2 => HandType::Three,
+                3 => HandType::Four,
+                _ => HandType::Five,
             },
         }
     }

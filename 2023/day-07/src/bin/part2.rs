@@ -24,11 +24,12 @@ fn process(input: &str) -> String {
         })
         .sorted_by(|a, b| match b.hand_type.value().cmp(&a.hand_type.value()) {
             Ordering::Equal => {
-                let a: Vec<u32> = a.cards.iter().map(|c| c.value(use_joker)).collect();
-                let b: Vec<u32> = b.cards.iter().map(|c| c.value(use_joker)).collect();
+                let a_val: Vec<u32> = a.cards.iter().map(|c| c.value(use_joker)).collect();
+                let b_val: Vec<u32> = b.cards.iter().map(|c| c.value(use_joker)).collect();
 
-                for (b, a) in b.iter().zip(a.iter()) {
-                    match b.cmp(a) {
+                for (b_val, a_val) in b_val.iter().zip(a_val.iter()) {
+                    // println!("cmp: {}:{:?}, {}:{:?}", b_val, &b.cards, a_val, &a.cards);
+                    match b_val.cmp(a_val) {
                         Ordering::Equal => {
                             continue;
                         }
