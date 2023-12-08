@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use day_07::camel_cards::{CardLabel, Hand};
+use day_07::camel_cards::Hand;
 use itertools::Itertools;
 
 fn main() {
@@ -11,6 +11,8 @@ fn main() {
 }
 
 fn process(input: &str) -> String {
+    let use_joker = false;
+    
     let res = input
         .lines()
         .filter_map(|line| {
@@ -18,12 +20,12 @@ fn process(input: &str) -> String {
                 return None;
             };
 
-            Some(Hand::new(hand, bid.parse::<u32>().unwrap()))
+            Some(Hand::new(hand, bid.parse::<u32>().unwrap(), use_joker))
         })
         .sorted_by(|a, b| match b.hand_type.value().cmp(&a.hand_type.value()) {
             Ordering::Equal => {
-                let a: Vec<u32> = a.cards.iter().map(|c| c.value()).collect();
-                let b: Vec<u32> = b.cards.iter().map(|c| c.value()).collect();
+                let a: Vec<u32> = a.cards.iter().map(|c| c.value(use_joker)).collect();
+                let b: Vec<u32> = b.cards.iter().map(|c| c.value(use_joker)).collect();
 
                 for (b, a) in b.iter().zip(a.iter()) {
                     match b.cmp(a) {

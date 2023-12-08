@@ -18,12 +18,18 @@ pub enum CardLabel {
 }
 
 impl CardLabel {
-    pub fn value(&self) -> u32 {
+    pub fn value(&self, with_joker: bool) -> u32 {
         match *self {
             CardLabel::Ace => 14,
             CardLabel::King => 13,
             CardLabel::Queen => 12,
-            CardLabel::Jack => 11,
+            CardLabel::Jack => {
+                if with_joker {
+                    1
+                } else {
+                    11
+                }
+            }
             CardLabel::Ten => 10,
             CardLabel::Nine => 9,
             CardLabel::Eight => 8,
@@ -74,7 +80,7 @@ pub struct Hand {
 }
 
 impl Hand {
-    pub fn new(hand: &str, bid: u32) -> Self {
+    pub fn new(hand: &str, bid: u32, with_joker: bool) -> Self {
         let mut count_cards: CountCards = HashMap::new();
         let mut cards: Cards = Vec::new();
 
@@ -104,36 +110,71 @@ impl Hand {
             cards,
             count_cards: count_cards.clone(),
             bid,
-            hand_type: Hand::compute_hand_type(&count_cards),
+            hand_type: Hand::compute_hand_type(&count_cards, with_joker),
         }
     }
 }
 
 impl Hand {
-    fn compute_hand_type(cards: &CountCards) -> HandType {
-        let card_counts = cards
+    fn compute_hand_type(cards: &CountCards, with_joker: bool) -> HandType {
+        let count_jokers = if with_joker {
+            *(cards.get(&CardLabel::Jack).unwrap_or(&0))
+        } else {
+            0
+        };
+
+        let count_cards = cards
             .iter()
-            .map(|(card, count)| *count)
+            .map(|(_card, count)| *count)
             .filter(|count| *count > 0)
             .collect::<Vec<_>>();
 
-        let max_count = *(card_counts.iter().max().unwrap());
+        let max_count = *(count_cards.iter().max().unwrap());
 
         match max_count {
             5 => HandType::Five,
-            4 => HandType::Four,
-            3 => {
-                if let Some(pair) = card_counts.iter().find(|count| **count == 2) {
-                    HandType::FullHouse
+            4 => {
+                if count_jokers > 0 {
+                    HandType::Five
                 } else {
-                    HandType::Three
+                    HandType::Four
+                }
+            }
+            3 => {
+                let has_pair = count_cards.iter().find(|count| **count == 2);
+
+                match count_jokers {
+                    0 => {
+                        if has_pair.is_some() {
+                            HandType::FullHouse
+                        } else {
+                            HandType::Three
+                        }
+                    }
+                    1 => HandType::Four,
+                    _ => HandType::Five,
                 }
             }
             2 => {
-                if card_counts.iter().filter(|count| **count == 2).count() == 2 {
-                    HandType::TwoPair
-                } else {
-                    HandType::OnePair
+                let has_two_pairs = count_cards.iter().filter(|count| **count == 2).count() == 2;
+
+                match count_jokers {
+                    0 => {
+                        if has_two_pairs {
+                            HandType::TwoPair
+                        } else {
+                            HandType::OnePair
+                        }
+                    }
+                    1 => {
+                        if has_two_pairs {
+                            HandType::FullHouse
+                        } else {
+                            HandType::Three
+                        }
+                    }
+                    2 => HandType::Four,
+                    _ => HandType::Five,
                 }
             }
             _ => HandType::HighCard,
