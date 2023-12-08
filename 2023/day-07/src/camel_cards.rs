@@ -43,13 +43,13 @@ impl CardLabel {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum HandType {
     Five,
     Four,
     FullHouse,
     Three,
-    TwoPair,
+    TwoPairs,
     OnePair,
     HighCard,
 }
@@ -61,7 +61,7 @@ impl HandType {
             HandType::Four => 6,
             HandType::FullHouse => 5,
             HandType::Three => 4,
-            HandType::TwoPair => 3,
+            HandType::TwoPairs => 3,
             HandType::OnePair => 2,
             HandType::HighCard => 1,
         }
@@ -161,7 +161,7 @@ impl Hand {
                 match count_jokers {
                     0 => {
                         if has_two_pairs {
-                            HandType::TwoPair
+                            HandType::TwoPairs
                         } else {
                             HandType::OnePair
                         }
@@ -177,7 +177,10 @@ impl Hand {
                     _ => HandType::Five,
                 }
             }
-            _ => HandType::HighCard,
+            _ => match count_jokers {
+                1 => HandType::OnePair,
+                _ => HandType::HighCard,
+            },
         }
     }
 }

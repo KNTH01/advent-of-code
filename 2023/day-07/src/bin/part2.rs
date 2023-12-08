@@ -12,7 +12,7 @@ fn main() {
 
 fn process(input: &str) -> String {
     let use_joker = true;
-    
+
     let res = input
         .lines()
         .filter_map(|line| {
@@ -29,7 +29,9 @@ fn process(input: &str) -> String {
 
                 for (b, a) in b.iter().zip(a.iter()) {
                     match b.cmp(a) {
-                        Ordering::Equal => continue,
+                        Ordering::Equal => {
+                            continue;
+                        }
                         other => return other,
                     }
                 }
@@ -53,6 +55,8 @@ fn process(input: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    use day_07::camel_cards::HandType;
+
     use super::*;
 
     #[test]
@@ -67,5 +71,24 @@ QQQJA 483",
 
         assert_eq!(result, "5905".to_string());
     }
-}
 
+    #[test]
+    fn joker() {
+        let use_joker = true;
+        let hand_type = |str: &str| Hand::new(str, 0, use_joker).hand_type;
+
+        assert_eq!(HandType::Five, hand_type("AAAAA"));
+        assert_eq!(HandType::Five, hand_type("AAAAJ"));
+        assert_eq!(HandType::Five, hand_type("AAAJJ"));
+        assert_eq!(HandType::Five, hand_type("AAJJJ"));
+        assert_eq!(HandType::Five, hand_type("AJJJJ"));
+        assert_eq!(HandType::Four, hand_type("AA2JJ"));
+        assert_eq!(HandType::Four, hand_type("AAA2J"));
+        assert_eq!(HandType::FullHouse, hand_type("AA22J"));
+        assert_eq!(HandType::Four, hand_type("AAJ2A"));
+        assert_eq!(HandType::Three, hand_type("AAJ23"));
+        assert_eq!(HandType::TwoPairs, hand_type("AA223"));
+        assert_eq!(HandType::OnePair, hand_type("A234J"));
+        assert_eq!(HandType::HighCard, hand_type("A2345"));
+    }
+}
