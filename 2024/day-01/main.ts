@@ -1,9 +1,6 @@
 import { zip } from "@std/collections/zip";
 
-export async function main() {
-  const text = await Deno.readTextFile("input.txt");
-  const lines = text.split("\n");
-
+function part1(lines: string[]) {
   const input = lines
     .filter(Boolean)
     .map((text) => text.split(/\s+/).map(Number));
@@ -16,9 +13,17 @@ export async function main() {
     .reduce((acc, curr) => acc + curr, 0);
 }
 
+function part2() {
+
+}
+
 // Learn more at https://docs.deno.com/runtime/manual/examples/module_metadata#concepts
 if (import.meta.main) {
-  const res = await main();
+  const inputFilename = "input-base.txt";
+  const text = await Deno.readTextFile(inputFilename);
+  const lines = text.split("\n");
+
+  const res = part1(lines);
 
   console.log("[LS] -> main.ts:21 -> res: ", res);
 }
