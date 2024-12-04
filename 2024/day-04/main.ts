@@ -7,13 +7,12 @@ if (import.meta.main) {
 
   const grid = textIntoGrid(text);
 
-  const xPositions = findAllX(grid);
-
-  const res1 = part1(grid, xPositions);
+  const res1 = part1(grid);
   console.log("[LS] -> main.ts:20 -> res1: ", res1);
 }
 
-function part1(grid: Grid, xPositions: Pos[]) {
+function part1(grid: Grid) {
+  const xPositions = findPositionsForChar(grid, "X");
   const theChars = "XMAS".split("");
 
   const counts = xPositions.map(({ x, y }) => {
@@ -37,6 +36,8 @@ function part1(grid: Grid, xPositions: Pos[]) {
   return counts.reduce((acc, curr) => acc + curr, 0);
 }
 
+function part2(grid: Grid) {}
+
 type Grid = string[][];
 
 type Pos = {
@@ -51,12 +52,12 @@ function textIntoGrid(text: string) {
     .map((line) => line.split(""));
 }
 
-function findAllX(grid: Grid) {
+function findPositionsForChar(grid: Grid, theChar: "X" | "A") {
   const res: Pos[] = [];
 
   grid.forEach((_char, y) => {
     grid[y].forEach((char, x) => {
-      if (char === "X") {
+      if (char === theChar) {
         res.push({
           x,
           y,
