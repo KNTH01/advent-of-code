@@ -9,8 +9,7 @@ if (import.meta.main) {
 
   const index = input.findIndex((item) => !item);
 
-  const rules = input.slice(0, index).map(toRule);
-  console.log("[LS] -> main.ts:12 -> rules: ", rules);
+  const rules = input.slice(0, index);
 
   const updates = input
     .slice(index + 1)
@@ -23,18 +22,19 @@ if (import.meta.main) {
   console.log("[LS] -> main.ts:21 -> res2: ", res2);
 }
 
-function part1(rules: Rule[], updates: Update[]) {
+type Rule = [number, number];
+type Update = [number];
+
+function part1(rules: string[], updates: Update[]) {
   return updates
     .map((update) => {
       let count = 0;
       for (let i = 0; i < update.length; i++) {
-        const ruleLookup = [update[i], update[i + 1]];
+        const ruleToLookup: Rule = [update[i], update[i + 1]];
+
         if (
           update[i + 1] &&
-          rules.some(
-            // TODO: can optimize perf here
-            (rule) => JSON.stringify(rule) === JSON.stringify(ruleLookup),
-          )
+          rules.some((rule) => rule === ruleToLookup.join("|"))
         ) {
           count++;
         }
@@ -52,7 +52,7 @@ function part1(rules: Rule[], updates: Update[]) {
     .reduce((acc, curr) => acc + curr, 0);
 }
 
-function part2(rules: Rule[], updates: Update[]) {
+function part2(rules: string[], updates: Update[]) {
   return updates
     .map((update) => {
       let hasSwaped = false;
@@ -62,11 +62,9 @@ function part2(rules: Rule[], updates: Update[]) {
         hasSwaped = false;
 
         for (let i = 0; i < update.length; i++) {
-          const ruleLookup = [update[i], update[i + 1]];
+          const ruleToLookup: Rule = [update[i], update[i + 1]];
           const foundRule =
-            rules.findIndex(
-              (rule) => JSON.stringify(rule) === JSON.stringify(ruleLookup),
-            ) > -1;
+            rules.findIndex((rule) => rule === ruleToLookup.join("|")) > -1;
 
           if (update[i + 1] && !foundRule) {
             [update[i], update[i + 1]] = [update[i + 1], update[i]];
@@ -87,14 +85,4 @@ function part2(rules: Rule[], updates: Update[]) {
       return update[index - 1];
     })
     .reduce((acc, curr) => acc + curr, 0);
-}
-
-type Rule = [number, number];
-type Update = [number];
-
-function toRule(input: string) {
-  return input
-    .split("|")
-    .filter((v) => v.length === 2)
-    .map(Number) as Rule;
 }
