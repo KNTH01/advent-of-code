@@ -29,7 +29,6 @@ if (import.meta.main) {
 }
 
 function part1(grid: Grid, guardPos: Pos) {
-  let count = 0;
   let currDir = Dir.North;
   const currPos = { ...guardPos };
   let currChar = grid[currPos.y]?.[currPos.x];
@@ -52,7 +51,6 @@ function part1(grid: Grid, guardPos: Pos) {
         ({ x, y }) => x === currPos.x && y === currPos.y,
       ) === -1
     ) {
-      count++;
       visitedPosList.push({ ...currPos });
     }
 
@@ -65,7 +63,7 @@ function part1(grid: Grid, guardPos: Pos) {
     }
   }
 
-  return count - 1;
+  return visitedPosList.length - 1;
 }
 
 function nextPosObstacle(grid: Grid, currPos: Pos, currDir: Dir) {
