@@ -24,6 +24,11 @@ if (import.meta.main) {
     throw new Error("Cannot find the guard?");
   }
 
+  const res1 = part1(grid, guardPos);
+  console.log("[LS] -> main.ts:27 -> res1: ", res1);
+}
+
+function part1(grid: Grid, guardPos: Pos) {
   let count = 0;
   let currDir = Dir.North;
   const currPos = { ...guardPos };
@@ -60,7 +65,7 @@ if (import.meta.main) {
     }
   }
 
-  console.log("[LS] -> main.ts:28 -> count: ", count - 1);
+  return count - 1;
 }
 
 function nextPosObstacle(grid: Grid, currPos: Pos, currDir: Dir) {
@@ -96,7 +101,6 @@ function findPosition(grid: Grid): Pos | null {
   grid.forEach((_char, y) => {
     grid[y].forEach((char, x) => {
       if (char === "^") {
-        console.log("abcabc");
         pos = {
           x,
           y,
