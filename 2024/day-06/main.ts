@@ -30,22 +30,14 @@ if (import.meta.main) {
 
 function part1(grid: Grid, guardPos: Pos) {
   let currDir = Dir.North;
-  const currPos = { ...guardPos };
+  let currPos = { ...guardPos };
   let currChar = grid[currPos.y]?.[currPos.x];
   const visitedPosList: Pos[] = [];
 
   while (currChar !== undefined) {
-    if (currDir === Dir.North) {
-      currPos.y--;
-    } else if (currDir === Dir.East) {
-      currPos.x++;
-    } else if (currDir === Dir.South) {
-      currPos.y++;
-    } else if (currDir === Dir.West) {
-      currPos.x--;
-    }
-
+    currPos = getNextPos(currPos, currDir);
     currChar = grid[currPos.y]?.[currPos.x];
+
     if (
       visitedPosList.findIndex(
         ({ x, y }) => x === currPos.x && y === currPos.y,
@@ -54,8 +46,8 @@ function part1(grid: Grid, guardPos: Pos) {
       visitedPosList.push({ ...currPos });
     }
 
-    const newDir = nextPosObstacle(grid, currPos, currDir);
-    if (newDir) {
+    const nextPos = getNextPos(currPos, currDir);
+    if (grid[nextPos.y]?.[nextPos.x] === "#") {
       currDir++;
       if ((currDir as number) === 4) {
         currDir = Dir.North;
@@ -66,7 +58,7 @@ function part1(grid: Grid, guardPos: Pos) {
   return visitedPosList.length - 1;
 }
 
-function nextPosObstacle(grid: Grid, currPos: Pos, currDir: Dir) {
+function getNextPos(currPos: Pos, currDir: Dir) {
   const newPos = { ...currPos };
 
   if (currDir === Dir.North) {
@@ -79,11 +71,7 @@ function nextPosObstacle(grid: Grid, currPos: Pos, currDir: Dir) {
     newPos.x--;
   }
 
-  if (grid[newPos.y]?.[newPos.x] === "#") {
-    return true;
-  }
-
-  return false;
+  return newPos;
 }
 
 function textIntoGrid(text: string) {
